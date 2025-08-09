@@ -1,0 +1,578 @@
+{
+  "name": "invoice demo",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1tQBz1T65Z-wPWu94FzwEzbGw6k2T7A4p",
+          "mode": "list",
+          "cachedResultName": "invoice folder",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1tQBz1T65Z-wPWu94FzwEzbGw6k2T7A4p"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -656,
+        -80
+      ],
+      "id": "bdc38d22-f00f-4147-8253-233bdba94c6c",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "M0ZfGCiLG7LZ4p1d",
+          "name": "invoice demo youtube"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -416,
+        -80
+      ],
+      "id": "e70e12bb-d414-438f-a570-1da43d1f048b",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "M0ZfGCiLG7LZ4p1d",
+          "name": "invoice demo youtube"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        -64
+      ],
+      "id": "664d47d1-f22f-4009-889a-0d178b9e83ed",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.text }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "Invoice Number",
+              "description": "the invoice number ",
+              "required": true
+            },
+            {
+              "name": "Client Name",
+              "description": "the client name ",
+              "required": true
+            },
+            {
+              "name": "client email",
+              "description": "the client email",
+              "required": true
+            },
+            {
+              "name": "due date",
+              "type": "date",
+              "description": "the due date ",
+              "required": true
+            },
+            {
+              "name": "issue date ",
+              "type": "date",
+              "description": "the date the invoice was issued ",
+              "required": true
+            },
+            {
+              "name": "total amount",
+              "description": "the total amount ",
+              "required": true
+            },
+            {
+              "name": " client phone number",
+              "description": "the client phone number ",
+              "required": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        -32,
+        -64
+      ],
+      "id": "45ee4bb0-3a3c-46a3-9af8-fa114e01bf99",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -112,
+        144
+      ],
+      "id": "be7164f7-6b29-4a11-a0db-409711b6aafc",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "689hhBPp3SjOWiNc",
+          "name": "invoice demo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1FhZN0i9GFFlkzWcnsQebPX5_Ietoh2LMKUMB5x4hxcw",
+          "mode": "list",
+          "cachedResultName": "invoice update DB",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FhZN0i9GFFlkzWcnsQebPX5_Ietoh2LMKUMB5x4hxcw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1FhZN0i9GFFlkzWcnsQebPX5_Ietoh2LMKUMB5x4hxcw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Client Name": "={{ $json.output['Client Name'] }}",
+            "Due date ": "={{ $json.output['due date'] }}",
+            " Issue Date": "={{ $json.output['issue date '] }}",
+            "Total Amount": "={{ $json.output['total amount'] }}",
+            "Client Phone": "={{ $json.output[' client phone number'] }}",
+            "Client Email": "={{ $json.output['client email'] }}",
+            "Invoice Number": "={{ $json.output['Invoice Number'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Invoice Number",
+              "displayName": "Invoice Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client Email",
+              "displayName": "Client Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client Phone",
+              "displayName": "Client Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Due date ",
+              "displayName": "Due date ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": " Issue Date",
+              "displayName": " Issue Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total Amount",
+              "displayName": "Total Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        320,
+        -64
+      ],
+      "id": "2d38a072-96c2-476e-9e70-0422decf8b51",
+      "name": "new invoice",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "tXuymBewaogq4vpT",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "options": {
+          "systemMessage": "="
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        528,
+        -64
+      ],
+      "id": "adcc99c2-6d91-45be-9ce9-ece0ac8d767a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        400,
+        144
+      ],
+      "id": "3448a8ed-d1f5-4fec-a975-208bbde545d0",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "689hhBPp3SjOWiNc",
+          "name": "invoice demo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        880,
+        -64
+      ],
+      "id": "69580fbe-205e-4573-a213-e9743453a290",
+      "name": "Send a message",
+      "webhookId": "6d8f8e74-dbd8-4e64-bf49-33d45e240241",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "e2MD1YM3w5BIoOKZ",
+          "name": "INVOICE DEMO"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1088,
+        -64
+      ],
+      "id": "48a5d6a2-1813-47f2-9433-1f9260daddc9",
+      "name": "No Operation, do nothing"
+    }
+  ],
+  "pinData": {
+    "Google Drive Trigger": [
+      {
+        "json": {
+          "parents": [
+            "1tQBz1T65Z-wPWu94FzwEzbGw6k2T7A4p"
+          ],
+          "lastModifyingUser": {
+            "displayName": "DAVID JESSE",
+            "kind": "drive#user",
+            "me": true,
+            "permissionId": "00387096137035784755",
+            "emailAddress": "davidjesse812@gmail.com",
+            "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocKJ2ETEanQUU60-QPHgDUGR3haWy1PZ9KxYLSnDZHiUXQl5Iw=s64"
+          },
+          "owners": [
+            {
+              "displayName": "DAVID JESSE",
+              "kind": "drive#user",
+              "me": true,
+              "permissionId": "00387096137035784755",
+              "emailAddress": "davidjesse812@gmail.com",
+              "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocKJ2ETEanQUU60-QPHgDUGR3haWy1PZ9KxYLSnDZHiUXQl5Iw=s64"
+            }
+          ],
+          "permissions": [
+            {
+              "kind": "drive#permission",
+              "id": "00387096137035784755",
+              "type": "user",
+              "emailAddress": "davidjesse812@gmail.com",
+              "role": "owner",
+              "displayName": "DAVID JESSE",
+              "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocKJ2ETEanQUU60-QPHgDUGR3haWy1PZ9KxYLSnDZHiUXQl5Iw=s64",
+              "deleted": false,
+              "pendingOwner": false
+            }
+          ],
+          "spaces": [
+            "drive"
+          ],
+          "capabilities": {
+            "canAcceptOwnership": false,
+            "canAddChildren": false,
+            "canAddMyDriveParent": false,
+            "canChangeCopyRequiresWriterPermission": true,
+            "canChangeItemDownloadRestriction": true,
+            "canChangeSecurityUpdateEnabled": false,
+            "canChangeViewersCanCopyContent": true,
+            "canComment": true,
+            "canCopy": true,
+            "canDelete": true,
+            "canDisableInheritedPermissions": false,
+            "canDownload": true,
+            "canEdit": true,
+            "canEnableInheritedPermissions": true,
+            "canListChildren": false,
+            "canModifyContent": true,
+            "canModifyContentRestriction": true,
+            "canModifyEditorContentRestriction": true,
+            "canModifyOwnerContentRestriction": true,
+            "canModifyLabels": false,
+            "canMoveChildrenWithinDrive": false,
+            "canMoveItemIntoTeamDrive": true,
+            "canMoveItemOutOfDrive": true,
+            "canMoveItemWithinDrive": true,
+            "canReadLabels": false,
+            "canReadRevisions": true,
+            "canRemoveChildren": false,
+            "canRemoveContentRestriction": false,
+            "canRemoveMyDriveParent": true,
+            "canRename": true,
+            "canShare": true,
+            "canTrash": true,
+            "canUntrash": true
+          },
+          "permissionIds": [
+            "00387096137035784755"
+          ],
+          "linkShareMetadata": {
+            "securityUpdateEligible": false,
+            "securityUpdateEnabled": true
+          },
+          "downloadRestrictions": {
+            "itemDownloadRestriction": {
+              "restrictedForReaders": false,
+              "restrictedForWriters": false
+            },
+            "effectiveDownloadRestrictionWithContext": {
+              "restrictedForReaders": false,
+              "restrictedForWriters": false
+            }
+          },
+          "kind": "drive#file",
+          "id": "14nrvKJstgvE9_6mR8Jjc18-jXA6PUmwc",
+          "name": "DavTechPro_Invoice_Sample_Detailed (1).pdf",
+          "mimeType": "application/pdf",
+          "starred": false,
+          "trashed": false,
+          "explicitlyTrashed": false,
+          "version": "6",
+          "webContentLink": "https://drive.google.com/uc?id=14nrvKJstgvE9_6mR8Jjc18-jXA6PUmwc&export=download",
+          "webViewLink": "https://drive.google.com/file/d/14nrvKJstgvE9_6mR8Jjc18-jXA6PUmwc/view?usp=drivesdk",
+          "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/application/pdf",
+          "hasThumbnail": true,
+          "thumbnailLink": "https://lh3.googleusercontent.com/drive-storage/AJQWtBPPDmjfWaZTeDmDrJKawCZX2hDfkR5wNvQFoSH56CtGFfeWPRTwA2B27n6bPoRQyBwh1OFU-WWpD2uL2FEqnb62gwv4EIPq32WdY1VHehcll5U=s220",
+          "thumbnailVersion": "1",
+          "viewedByMe": true,
+          "viewedByMeTime": "2025-08-06T03:04:49.784Z",
+          "createdTime": "2025-08-06T03:00:02.256Z",
+          "modifiedTime": "2025-08-06T02:59:13.000Z",
+          "modifiedByMeTime": "2025-08-06T02:59:13.000Z",
+          "modifiedByMe": true,
+          "shared": false,
+          "ownedByMe": true,
+          "viewersCanCopyContent": true,
+          "copyRequiresWriterPermission": false,
+          "writersCanShare": true,
+          "originalFilename": "DavTechPro_Invoice_Sample_Detailed (1).pdf",
+          "fullFileExtension": "pdf",
+          "fileExtension": "pdf",
+          "md5Checksum": "f0d8124809ca7f72d52a5ad3fda4f6a2",
+          "sha1Checksum": "2bfb321b501066a762d4d9ba94fd047fae201b1d",
+          "sha256Checksum": "a4fdc82e899b52cd0e65a051475df71c453ff64fcc6a9b4e5296b02c9ca196fd",
+          "size": "48067",
+          "quotaBytesUsed": "48067",
+          "headRevisionId": "0B3Bb3GGlJmsqcE9tbjFJWU1HaGdVU2x6VW8weVFmOSs4L3lNPQ",
+          "isAppAuthorized": false,
+          "inheritedPermissionsDisabled": false
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "new invoice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "new invoice": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "54b39150-f635-48a8-b438-db490ed77bcd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d1d02bb89b60e41b64facead80951e971ead845a80c611b914ce65925c0b8cce"
+  },
+  "id": "S63zHqG808Kg76tC",
+  "tags": []
+}
